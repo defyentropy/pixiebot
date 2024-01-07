@@ -42,7 +42,7 @@ async def pixie_freq(interaction: discord.Interaction, freq: int):
         )
     else:
         if freq:
-            if freq < 60:
+            if freq < 600:
                 await interaction.response.send_message(
                     "That is too low of an interval. The minimum is 10 minutes."
                 )
