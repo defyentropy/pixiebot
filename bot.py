@@ -8,7 +8,7 @@ from screenshot import take_screenshot
 from selenium.common.exceptions import WebDriverException, TimeoutException
 
 logging.basicConfig(filename="pixie.log", encoding="utf-8")
-interval = 7 * 24 * 60 * 60
+interval = 600
 
 load_dotenv()
 owner_id = int(os.environ["OWNER_ID"])
@@ -23,7 +23,7 @@ bot = commands.Bot(command_prefix="%", intents=intents)
 @bot.event
 async def on_ready():
     print("Pixiebot initiated!")
-    postScreenshot.start()
+    post_screenshot.start()
 
 
 @bot.tree.command(
@@ -41,18 +41,23 @@ async def pixie_freq(interaction: discord.Interaction, freq: int):
             "Only the creator of this application can alter its configuration."
         )
     else:
-        if freq < 600:
-            await interaction.response.send_message(
-                "That is too low of an interval. The minimum is 10 minutes."
-            )
-        elif freq > 7 * 24 * 60 * 60:
-            await interaction.response.send_message(
-                "That is too high of an interval. The maximum is 1 week."
-            )
+        if freq:
+            if freq < 60:
+                await interaction.response.send_message(
+                    "That is too low of an interval. The minimum is 10 minutes."
+                )
+            elif freq > 7 * 24 * 60 * 60:
+                await interaction.response.send_message(
+                    "That is too high of an interval. The maximum is 1 week."
+                )
+            else:
+                interval = freq
+                post_screenshot.change_interval(seconds=interval)
+                await interaction.response.send_message(
+                    f"Interval successfully changed to {interval} seconds."
+                )
         else:
-            interval = freq
-            await interaction.response.send_message("The interval has been changed.")
-            postScreenshot.restart()
+            await interaction.response.send(f"Current interval is {interval} seconds.")
 
 
 @bot.command(name="pixiesync")
@@ -65,7 +70,7 @@ async def sync(ctx: commands.Context):
 
 
 @tasks.loop(seconds=interval)
-async def postScreenshot():
+async def post_screenshot():
     channel = bot.get_channel(channel_id)
     try:
         file_name = await take_screenshot()
