@@ -7,9 +7,8 @@ from discord import app_commands
 from screenshot import take_screenshot
 from selenium.common.exceptions import WebDriverException, TimeoutException
 
-logging.basicConfig(filename="pixie.log", encoding="utf-8", level=logging.CRITICAL)
-
-interval = 600
+logging.basicConfig(filename="pixie.log", encoding="utf-8")
+interval = 7 * 24 * 60 * 60
 
 load_dotenv()
 owner_id = int(os.environ["OWNER_ID"])
