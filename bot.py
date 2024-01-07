@@ -6,6 +6,7 @@ from discord.ext import tasks, commands
 from discord import app_commands
 from screenshot import take_screenshot
 from selenium.common.exceptions import WebDriverException, TimeoutException
+import typing
 
 logging.basicConfig(filename="pixie.log", encoding="utf-8")
 interval = 600
@@ -31,33 +32,31 @@ async def on_ready():
     description="Change how often pixiebot posts an update.",
 )
 @app_commands.describe(
-    freq="The number of seconds to wait before posting an update to the channel. Minimum 600."
+    frequency="The number of seconds to wait before posting an update to the channel. Minimum 600."
 )
-@app_commands.rename(freq="frequency")
-async def pixie_freq(interaction: discord.Interaction, freq: int):
+async def pixie_freq(
+    interaction: discord.Interaction, frequency: typing.Optional[int] = 0
+):
     global interval
-    if interaction.user.id != owner_id:
-        await interaction.response.send_message(
-            "Only the creator of this application can alter its configuration."
-        )
-    else:
-        if freq:
-            if freq < 600:
-                await interaction.response.send_message(
-                    "That is too low of an interval. The minimum is 10 minutes."
-                )
-            elif freq > 7 * 24 * 60 * 60:
-                await interaction.response.send_message(
-                    "That is too high of an interval. The maximum is 1 week."
-                )
-            else:
-                interval = freq
-                post_screenshot.change_interval(seconds=interval)
-                await interaction.response.send_message(
-                    f"Interval successfully changed to {interval} seconds."
-                )
+    if frequency:
+        if frequency < 600:
+            await interaction.response.send_message(
+                "That is too low of an interval. The minimum is 10 minutes."
+            )
+        elif frequency > 7 * 24 * 60 * 60:
+            await interaction.response.send_message(
+                "That is too high of an interval. The maximum is 1 week."
+            )
         else:
-            await interaction.response.send(f"Current interval is {interval} seconds.")
+            interval = frequency
+            post_screenshot.change_interval(seconds=interval)
+            await interaction.response.send_message(
+                f"Interval successfully changed to {interval} seconds."
+            )
+    else:
+        await interaction.response.send_message(
+            f"Current interval is {interval} seconds."
+        )
 
 
 @bot.command(name="pixiesync")
