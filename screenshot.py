@@ -12,7 +12,7 @@ import asyncio
 
 async def take_screenshot():
     # fetch login credentials
-    load_dotenv(".env")
+    load_dotenv(".env", override=True)
     PA_STUDENT_ID = os.environ["PA_STUDENT_ID"]
     PA_USERNAME = os.environ["PA_USERNAME"]
 
@@ -60,4 +60,8 @@ async def take_screenshot():
     # exit the driver
     driver.quit()
 
-    return f"screenshots/{timestamp}.png"
+    return f"{timestamp}.png"
+
+
+if __name__ == "__main__":
+    asyncio.run(take_screenshot())

@@ -7,11 +7,12 @@ from discord import app_commands
 from screenshot import take_screenshot
 from selenium.common.exceptions import WebDriverException, TimeoutException
 import typing
+from pixeldiff import pixeldiff
 
 logging.basicConfig(filename="pixie.log", encoding="utf-8")
 interval = 600
 
-load_dotenv()
+load_dotenv(".env", override=True)
 owner_id = int(os.environ["OWNER_ID"])
 channel_id = int(os.environ["CHANNEL_ID"])
 guild_id = int(os.environ["GUILD_ID"])
@@ -30,6 +31,7 @@ async def on_ready():
 @bot.tree.command(
     name="pixiefreq",
     description="Change how often pixiebot posts an update.",
+    guild=discord.Object(guild_id),
 )
 @app_commands.describe(
     frequency="The number of seconds to wait before posting an update to the channel. Minimum 600."
@@ -72,8 +74,23 @@ async def sync(ctx: commands.Context):
 async def post_screenshot():
     channel = bot.get_channel(channel_id)
     try:
-        file_name = await take_screenshot()
-        await channel.send(file=discord.File(file_name))
+        this_ss = await take_screenshot()
+        await channel.send(file=discord.File(f"screenshots/{this_ss}"))
+
+        screenshot_list = sorted(os.listdir("screenshots"))
+        if len(screenshot_list) > 1:
+            last_ss = screenshot_list[-2]
+
+        pixels_changed = pixeldiff(last_ss, this_ss)
+        if pixels_changed == 1:
+            await channel.send(
+                f"{pixels_changed} pixel has been changed on the canvas since the last time I checked!"
+            )
+        else:
+            await channel.send(
+                f"{pixels_changed} pixels have been changed on the canvas since the last time I checked!"
+            )
+
     except (WebDriverException, TimeoutException) as e:
         logging.error(e)
 
