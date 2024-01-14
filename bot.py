@@ -31,7 +31,6 @@ async def on_ready():
 @bot.tree.command(
     name="pixiefreq",
     description="Change how often pixiebot posts an update.",
-    guild=discord.Object(guild_id),
 )
 @app_commands.describe(
     frequency="The number of seconds to wait before posting an update to the channel. Minimum 600."
@@ -81,15 +80,15 @@ async def post_screenshot():
         if len(screenshot_list) > 1:
             last_ss = screenshot_list[-2]
 
-        pixels_changed = pixeldiff(last_ss, this_ss)
-        if pixels_changed == 1:
-            await channel.send(
-                f"{pixels_changed} pixel has been changed on the canvas since the last time I checked!"
-            )
-        else:
-            await channel.send(
-                f"{pixels_changed} pixels have been changed on the canvas since the last time I checked!"
-            )
+            pixels_changed = pixeldiff(last_ss, this_ss)
+            if pixels_changed == 1:
+                await channel.send(
+                    f"{pixels_changed} pixel has been changed on the canvas since the last time I checked!"
+                )
+            else:
+                await channel.send(
+                    f"{pixels_changed} pixels have been changed on the canvas since the last time I checked!"
+                )
 
     except (WebDriverException, TimeoutException) as e:
         logging.error(e)
